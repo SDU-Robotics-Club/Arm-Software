@@ -29,15 +29,15 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 #define SERVO_CHANNEL_3 12
 #define SERVO_CHANNEL_4 15
 #define SERVO_MIN_0 125 // tick count for 0 degrees for first motor (individual for every servo)
-#define SERVO_MAX_0 575 // tick count for 180 degrees
+#define SERVO_MAX_0 SERVO_MIN_0 + 450 // tick count for 180 degrees
 #define SERVO_MIN_1 125 
-#define SERVO_MAX_1 575
+#define SERVO_MAX_1 SERVO_MIN_1 + 450
 #define SERVO_MIN_2 125 
-#define SERVO_MAX_2 575
+#define SERVO_MAX_2 SERVO_MIN_2 + 450
 #define SERVO_MIN_3 125 
-#define SERVO_MAX_3 575
+#define SERVO_MAX_3 SERVO_MIN_3 + 450
 #define SERVO_MIN_4 125 
-#define SERVO_MAX_4 575
+#define SERVO_MAX_4 SERVO_MIN_4 + 450
 #define SERVO_FREQ 50 // Analog servos run at 50Hz
 #define OSC_FREQ 27000000 // the internal clock speed of the PCA9685 chip so that it can calculate time accurately
 
