@@ -22,14 +22,14 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 #include <Wire.h> // allows the board to communicate with devices over I2C
 #include <Adafruit_PWMServoDriver.h> // "instruction manual for your arduino to talk to the PCA9685 chip"
 
-// configuration
+// configuration //90d 312 ticks
 #define SERVO_CHANNEL_0 0 // pin to connect first motor to (the PCA9685 output pin (0-15))
 #define SERVO_CHANNEL_1 4
 #define SERVO_CHANNEL_2 8
 #define SERVO_CHANNEL_3 12
 #define SERVO_CHANNEL_4 15
-#define SERVO_MIN_0 125 // tick count for 0 degrees for first motor (individual for every servo)
-#define SERVO_MAX_0 SERVO_MIN_0 + 450 // tick count for 180 degrees
+#define SERVO_MIN_0 120 // tick count for 0 degrees for first motor (individual for every servo) (yellow tape)
+#define SERVO_MAX_0 624 // tick count for 180 degrees
 #define SERVO_MIN_1 125 
 #define SERVO_MAX_1 SERVO_MIN_1 + 450
 #define SERVO_MIN_2 125 
@@ -44,8 +44,8 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 // servo struct -> we use a struct to collect all servo info in one id (just makes the usage of the functions easier)
 typedef struct {
   int channel; // pin to connect first motor to (the PCA9685 output pin (0-15))
-  int max; // tick count for 0 degrees for first motor (individual for every servo)
-  int min; // tick count for 180 degrees
+  int min; // tick count for 0 degrees for first motor (individual for every servo)
+  int max; // tick count for 180 degrees
 } servo;
 
 // create servos
@@ -79,11 +79,11 @@ void setup() {
 void loop() {
     Serial.println("--- Cycle Start ---"); // for the serial monitor on pc
     
-    setServoAngle(&shoulder_pitch, 30); // in degrees
-    delay(4000);
-
-    setServoAngle(&shoulder_pitch, 60);
-    delay(4000);
+    setServoAngle(&shoulder_pitch, 90); // in degrees
+    delay(2000);
+  setServoAngle(&shoulder_pitch, 180); // in degrees
+    delay(2000);
+    
 }
 
 // convert pwm signal to degrees
