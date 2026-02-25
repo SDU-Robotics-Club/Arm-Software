@@ -20,7 +20,7 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 // setup
 #include <Arduino.h> // to use arduino framework -> a lot of usable references in the internet
 #include <Wire.h> // allows the board to communicate with devices over I2C
-#include <Adafruit_PWMServoDriver.h> //// "instruction manual for your arduino to talk to the PCA9685 chip"
+#include <Adafruit_PWMServoDriver.h> // "instruction manual for your arduino to talk to the PCA9685 chip"
 
 // configuration
 #define SERVO_CHANNEL_0 0 // pin to connect first motor to (the PCA9685 output pin (0-15))
