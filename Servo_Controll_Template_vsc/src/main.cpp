@@ -22,30 +22,30 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 #include <Wire.h> // allows the board to communicate with devices over I2C
 #include <Adafruit_PWMServoDriver.h> // "instruction manual for your arduino to talk to the PCA9685 chip"
 
-// configuration //90d 312 ticks
+// configuration
 #define SERVO_CHANNEL_0 0 // pin to connect first motor to (the PCA9685 output pin (0-15))
 #define SERVO_CHANNEL_1 4
 #define SERVO_CHANNEL_2 8
 #define SERVO_CHANNEL_3 12
 #define SERVO_CHANNEL_4 15
-#define SERVO_MIN_0 120 // tick count for 0 degrees for first motor (individual for every servo) (yellow tape)
-#define SERVO_MAX_0 624 // tick count for 180 degrees
+#define SERVO_MIN_0 65 // tick count for 0 degrees for first motor (individual for every servo)
+#define SERVO_MAX_0 503 // tick count for 180 degrees
 #define SERVO_MIN_1 125 
-#define SERVO_MAX_1 SERVO_MIN_1 + 450
+#define SERVO_MAX_1 575
 #define SERVO_MIN_2 125 
-#define SERVO_MAX_2 SERVO_MIN_2 + 450
+#define SERVO_MAX_2 575
 #define SERVO_MIN_3 125 
-#define SERVO_MAX_3 SERVO_MIN_3 + 450
+#define SERVO_MAX_3 575
 #define SERVO_MIN_4 125 
-#define SERVO_MAX_4 SERVO_MIN_4 + 450
+#define SERVO_MAX_4 575
 #define SERVO_FREQ 50 // Analog servos run at 50Hz
 #define OSC_FREQ 27000000 // the internal clock speed of the PCA9685 chip so that it can calculate time accurately
 
 // servo struct -> we use a struct to collect all servo info in one id (just makes the usage of the functions easier)
 typedef struct {
   int channel; // pin to connect first motor to (the PCA9685 output pin (0-15))
-  int min; // tick count for 0 degrees for first motor (individual for every servo)
-  int max; // tick count for 180 degrees
+  int max; // tick count for 0 degrees for first motor (individual for every servo)
+  int min; // tick count for 180 degrees
 } servo;
 
 // create servos
@@ -79,11 +79,30 @@ void setup() {
 void loop() {
     Serial.println("--- Cycle Start ---"); // for the serial monitor on pc
     
-    setServoAngle(&shoulder_pitch, 90); // in degrees
-    delay(2000);
-  setServoAngle(&shoulder_pitch, 180); // in degrees
-    delay(2000);
+    /*
+    setServoAngle(&shoulder_pitch, 0); // in degrees
+    delay(1500);
+
+    setServoAngle(&shoulder_pitch, 90);
+    delay(1500);
+
+    setServoAngle(&shoulder_pitch, 180);
+    delay(1500);
+    */
     
+    pwm.setPWM(SERVO_CHANNEL_0, 0, SERVO_MIN_0);
+
+    // feedback for debugging
+    Serial.print("Min | Ticks: ");
+    Serial.println(SERVO_MIN_0);
+    delay(1500);
+
+    pwm.setPWM(SERVO_CHANNEL_0, 0, SERVO_MAX_0);
+
+    // feedback for debugging
+    Serial.print("Max | Ticks: ");
+    Serial.println(SERVO_MAX_0);
+    delay(1500);
 }
 
 // convert pwm signal to degrees
