@@ -28,8 +28,8 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 #define SERVO_CHANNEL_2 8
 #define SERVO_CHANNEL_3 12
 #define SERVO_CHANNEL_4 15
-#define SERVO_MIN_0 65 // tick count for 0 degrees for first motor (individual for every servo)
-#define SERVO_MAX_0 503 // tick count for 180 degrees
+#define SERVO_MIN_0 67 // tick count for 0 degrees for first motor (individual for every servo)
+#define SERVO_MAX_0 502 // tick count for 180 degrees
 #define SERVO_MIN_1 125 
 #define SERVO_MAX_1 575
 #define SERVO_MIN_2 125 
@@ -46,10 +46,12 @@ typedef struct {
   int channel; // pin to connect first motor to (the PCA9685 output pin (0-15))
   int max; // tick count for 0 degrees for first motor (individual for every servo)
   int min; // tick count for 180 degrees
+  int range; // max degrees 
 } servo;
 
 // create servos
-servo shoulder_pitch = {SERVO_CHANNEL_0, SERVO_MIN_0, SERVO_MAX_0}; // to be renamed (joints)
+
+servo shoulder_pitch = {SERVO_CHANNEL_0, 67, 502, 210};  // Shoulder Pitch moves 0-210 degrees
 servo shoulder_yaw = {SERVO_CHANNEL_1, SERVO_MIN_1, SERVO_MAX_1};
 servo elbow = {SERVO_CHANNEL_2, SERVO_MIN_2, SERVO_MAX_2};
 servo wrist_turn = {SERVO_CHANNEL_3, SERVO_MIN_3, SERVO_MAX_3};
@@ -79,7 +81,7 @@ void setup() {
 void loop() {
     Serial.println("--- Cycle Start ---"); // for the serial monitor on pc
     
-    /*
+    
     setServoAngle(&shoulder_pitch, 0); // in degrees
     delay(1500);
 
@@ -88,9 +90,9 @@ void loop() {
 
     setServoAngle(&shoulder_pitch, 180);
     delay(1500);
-    */
     
-    pwm.setPWM(SERVO_CHANNEL_0, 0, SERVO_MIN_0);
+    
+   /* pwm.setPWM(SERVO_CHANNEL_0, 0, SERVO_MIN_0);
 
     // feedback for debugging
     Serial.print("Min | Ticks: ");
@@ -103,22 +105,22 @@ void loop() {
     Serial.print("Max | Ticks: ");
     Serial.println(SERVO_MAX_0);
     delay(1500);
+    */
 }
 
-// convert pwm signal to degrees
+// --- Updated setServoAngle Function --- PWM  to ticks
 void setServoAngle(servo *id, int degrees) {
-    // constrain input to prevent physical damage from out-of-bounds values
-    degrees = constrain(degrees, 0, 180);
+    // 1. Constrain to the specific range of THIS motor
+    degrees = constrain(degrees, 0, id->range);
     
-    // map degrees to the calibrated tick range
-    int pulse = map(degrees, 0, 180, id->min, id->max);
+    // 2. Map input (0 to range) to output (min ticks to max ticks)
+    int pulse = map(degrees, 0, id->range, id->min, id->max);
     
-    // send pwm signal
+    // 3. Send signal
     pwm.setPWM(id->channel, 0, pulse);
 
-    // feedback for debugging
-    Serial.print("Angle: ");
-    Serial.print(degrees);
-    Serial.print("° | Ticks: ");
-    Serial.println(pulse);
+    // Debugging output
+    Serial.print("Ch: "); Serial.print(id->channel);
+    Serial.print(" | Angle: "); Serial.print(degrees);
+    Serial.print("° | Ticks: "); Serial.println(pulse);
 }
