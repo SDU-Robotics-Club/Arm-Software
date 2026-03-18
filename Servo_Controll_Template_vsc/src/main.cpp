@@ -44,8 +44,8 @@ https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
 // servo struct -> we use a struct to collect all servo info in one id (just makes the usage of the functions easier)
 typedef struct {
   int channel; // pin to connect first motor to (the PCA9685 output pin (0-15))
-  int max; // tick count for 0 degrees for first motor (individual for every servo)
-  int min; // tick count for 180 degrees
+  int min; // tick count for 0 degrees for first motor (individual for every servo)
+  int max; // tick count for 180 degrees
   int range; // max degrees 
 } servo;
 
