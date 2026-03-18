@@ -79,33 +79,12 @@ void setup() {
 
 // implement behavior here
 void loop() {
-    Serial.println("--- Cycle Start ---"); // for the serial monitor on pc
-    
-    
-    setServoAngle(&shoulder_pitch, 0); // in degrees
-    delay(1500);
-
-    setServoAngle(&shoulder_pitch, 90);
-    delay(1500);
-
-    setServoAngle(&shoulder_pitch, 180);
-    delay(1500);
-    
-    
-   /* pwm.setPWM(SERVO_CHANNEL_0, 0, SERVO_MIN_0);
-
-    // feedback for debugging
-    Serial.print("Min | Ticks: ");
-    Serial.println(SERVO_MIN_0);
-    delay(1500);
-
-    pwm.setPWM(SERVO_CHANNEL_0, 0, SERVO_MAX_0);
-
-    // feedback for debugging
-    Serial.print("Max | Ticks: ");
-    Serial.println(SERVO_MAX_0);
-    delay(1500);
-    */
+setServoAngle(&shoulder_pitch, 0); // Test a low value
+delay(2000);
+setServoAngle(&shoulder_pitch, 40); // Test a low value
+delay(2000);
+setServoAngle(&shoulder_pitch, 50); // Test slightly higher
+delay(2000);
 }
 
 // --- Updated setServoAngle Function --- PWM  to ticks
