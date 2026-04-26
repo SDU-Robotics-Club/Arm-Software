@@ -1,3 +1,4 @@
+
 /*
   PS4 Controller → Servo Arm Control
   Hardware:
@@ -12,26 +13,74 @@
     Right Y  →  elbow           (Ch 😎
     Right X  →  wrist turn      (Ch 12)
     L2/R2    →  speed scale (slow ↔ fast)
+    L1/R1   -   CCW/CW base yaw
 
   D-pad / buttons are free for you to extend.
+
+
+  ESP32 ↔ Stepper Driver
+
+GPIO 4 → EN
+GPIO 25 → STEP
+GPIO 26 → DIR
+3.3V → VIO (logic power)
+GND → GND (shared with driver + power supply)
+
 */
 
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <Bluepad32.h>
+struct ServoJoint {
+  uint8_t channel;
+  int     minTick;
+  int     maxTick;
+  int     rangeDeg;
+};
+
+// ─── Stepper includes & pins ───────────────────────────────────────────
+
+#define EN_PIN    4
+#define STEP_PIN  25
+#define DIR_PIN   26
+
+#define STEP_INTERVAL_US 300
+
+volatile bool stepperEnabled = false;
+volatile bool stepperDir = true;
+
+unsigned long lastStepTime = 0;
+hw_timer_t* stepperTimer = NULL;
+portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+
+
+// ─── Stepper runner  ─────────────────────────────────────
+void IRAM_ATTR onStepperTimer() {
+  if (!stepperEnabled) return;
+
+  portENTER_CRITICAL_ISR(&timerMux);
+
+  digitalWrite(DIR_PIN, stepperDir);
+
+  digitalWrite(STEP_PIN, HIGH);
+  ets_delay_us(1);
+  digitalWrite(STEP_PIN, LOW);
+
+  portEXIT_CRITICAL_ISR(&timerMux);
+}
 
 // ─── Servo configuration ────────────────────────────────────────────────────
 
 #define SERVO_FREQ   50
 #define OSC_FREQ     27000000
 
-typedef struct {
-  uint8_t channel;
-  int     minTick;
-  int     maxTick;
-  int     rangeDeg;   // physical range of this joint in degrees
-} ServoJoint;
+// typedef struct {
+//   uint8_t channel;
+//   int     minTick;
+//   int     maxTick;
+//   int     rangeDeg;   // physical range of this joint in degrees
+// } ServoJoint;
 
 ServoJoint shoulder_pitch = { 0,  67, 502, 210 };
 ServoJoint shoulder_yaw   = { 4, 125, 575, 180 };
@@ -175,7 +224,19 @@ void processController(ControllerPtr ctl) {
     angle_elbow =  90.0f;
     angle_wrist =  90.0f;
   }
-
+  
+  // --- Stepper control (R1 / L1) ---
+  if (ctl->r1()) {
+    stepperEnabled = true;
+    stepperDir = LOW;   // CW
+  } 
+  else if (ctl->l1()) {
+    stepperEnabled = true;
+    stepperDir = HIGH;  // CCW
+  } 
+  else {
+    stepperEnabled = false;
+  }
   // --- Debug output (comment out for performance) ---
   Serial.printf(
     "P:%.1f Y:%.1f E:%.1f W:%.1f | spd:%.2f\n",
@@ -195,6 +256,18 @@ void setup() {
   pwm.setPWMFreq(SERVO_FREQ);
   delay(10);
 
+  // ─── ADD: Stepper setup ───────────────────────────────────────────
+  pinMode(EN_PIN, OUTPUT);
+  pinMode(STEP_PIN, OUTPUT);
+  pinMode(DIR_PIN, OUTPUT);
+
+  digitalWrite(EN_PIN, LOW);  // enable driver
+  // ─── Stepper timer setup ───────────────────────────
+stepperTimer = timerBegin(0, 80, true);  
+timerAttachInterrupt(stepperTimer, &onStepperTimer, true);
+timerAlarmWrite(stepperTimer, STEP_INTERVAL_US, true);
+timerAlarmEnable(stepperTimer);
+
   // Move to home position so the arm doesn't jerk on first input
   setServoAngle(shoulder_pitch, angle_pitch);
   setServoAngle(shoulder_yaw,   angle_yaw);
@@ -208,6 +281,7 @@ void setup() {
 }
 
 void loop() {
+    // always run independently
   bool updated = BP32.update();
   if (updated) {
     for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
